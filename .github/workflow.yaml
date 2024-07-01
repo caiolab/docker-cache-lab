@@ -1,0 +1,16 @@
+name: "Docker cache demo"
+on:
+  workflow_dispatch:
+jobs:
+  pull_images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull images
+        run: |
+          docker pull alpine:3.12
+          docker pull alpine:3.13
+          docker pull alpine:3.14
+          docker pull alpine:3.15
+          docker pull alpine:3.16
+          docker pull alpine:3.17
+          docker pull alpine:3.18
