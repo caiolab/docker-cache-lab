@@ -33,7 +33,7 @@ jobs:
         docker pull vitess/lite:latest
         # get volume id for running docker volume
         volumeId=$(aws ec2 describe-volumes --filters Name=tag:kubernetes.io/created-for/pvc/name,Values=$HOSTNAME-var-lib-docker --query "Volumes[0].VolumeId" --output text)
-
+        echo $volumeId
         # create snapshot
         aws ec2 create-snapshot --volume-id $volumeId --description 'GitHub Runner docker volume (build ${{ github.run_number }})' >> $GITHUB_STEP_SUMMARY
 
