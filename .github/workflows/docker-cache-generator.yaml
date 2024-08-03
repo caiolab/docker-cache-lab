@@ -1,0 +1,31 @@
+name: "Docker cache generator"
+
+on:
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+    - name: configure aws credentials
+      uses: aws-actions/configure-aws-credentials@v3.0.1
+      with:
+        # role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        # role-session-name: GitHub_to_AWS_via_FederatedOIDC
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+    - name: pull images
+      run: |
+        docker pull alpine:3.12
+        docker pull postgres:13.15
+        docker pull grafana/grafana:main
+        docker pull vitess/lite:latest
+        # get volume id for running docker volume
+        volumeId=$(aws ec2 describe-volumes --filters Name=tag:kubernetes.io/created-for/pvc/name,Values=$HOSTNAME-var-lib-docker --query "Volumes[0].VolumeId" --output text)
+
+        # create snapshot
+        aws ec2 create-snapshot --volume-id $volumeId --description 'GitHub Runner docker volume (build ${{ github.run_number }})' >> $GITHUB_STEP_SUMMARY
+
